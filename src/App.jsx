@@ -9,6 +9,7 @@ import Pricing from './components/Pricing';
 import Blog from './components/Blog';
 import Contact from './components/Contact';
 import Features from './components/Features';
+import Pro from './components/Pro';
 
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-
+          <Route path="/pro" element={<Pro />} />
           <Route path="/comment-ca-marche" element={<Room />} />
           <Route path="/caracteristiques" element={<Features/>} />
           <Route path="/blog" element={<Blog />} />
