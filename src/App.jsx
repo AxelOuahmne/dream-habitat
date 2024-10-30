@@ -4,6 +4,12 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import SignUp from './components/Auth/SignUp';
 import SignIn from './components/Auth/SignIn';
+import Room from './components/Room';
+import Pricing from './components/Pricing';
+import Blog from './components/Blog';
+import Contact from './components/Contact';
+import Features from './components/Features';
+
 
 function App() {
   return (
@@ -12,6 +18,12 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+
+          <Route path="/comment-ca-marche" element={<Room />} />
+          <Route path="/caracteristiques" element={<Features/>} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/tarifs" element={<Pricing />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
         </Routes>
