@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import UploadZone from './UploadZone';
 
 // Fonctions utilitaires
 const isJsonResponse = (response) => {
@@ -29,12 +30,12 @@ const Room = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('Modern');
-  
+
   // États pour la gestion des données
   const [userRooms, setUserRooms] = useState([]);
   const [uploadedPhotoId, setUploadedPhotoId] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
-  
+
   // États pour le chargement et les erreurs
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -47,7 +48,16 @@ const Room = () => {
   const location = useLocation();
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
-
+  // Liste des types de pièces
+  const allRoomTypes = [
+    'Living room', 'Bedroom', 'Bath room', 'Attic', 'Kitchen',
+    'Dining room', 'Study room', 'Home office', 'Gaming room',
+    'House exterior', 'Outdoor pool area', 'Outdoor patio',
+    'Outdoor garden', 'Meeting room', 'Workshop', 'Fitness gym',
+    'Coffee shop', 'Clothing store', 'Walk in closet', 'Toilet',
+    'Restaurant', 'Office', 'Coworking space', 'Hotel lobby',
+    'Hotel room', 'Hotel bathroom', 'Exhibition space', 'Mudroom'
+  ];
   // Liste des styles disponibles
   const styles = [
     'Eastern', 'Modern', 'Minimalist', 'Contemporary', 'Scandinavian',
@@ -57,12 +67,14 @@ const Room = () => {
     'Christmas', 'Tribal', 'Medieval', 'Chinese New Year', 'Halloween',
     'Neoclassic'
   ];
-
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
   // Effet pour charger les pièces de l'utilisateur
   useEffect(() => {
     const fetchUserRooms = async () => {
       if (!token) return;
-      
+
       try {
         const response = await fetch('http://localhost:8080/api/room/user', {
           headers: {
@@ -174,7 +186,7 @@ const Room = () => {
     const file = files[0];
     try {
       await validateImageFile(file);
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setSelectedImage(e.target.result);
@@ -196,102 +208,102 @@ const Room = () => {
     }
   };
   // Gestion de la génération d'image
-//   const handleRenderDesigns = async () => {
-//     if (!selectedImage) {
-//       setError('Veuillez d\'abord télécharger une image');
-//       return;
-//     }
+  //   const handleRenderDesigns = async () => {
+  //     if (!selectedImage) {
+  //       setError('Veuillez d\'abord télécharger une image');
+  //       return;
+  //     }
 
-//     setError(null);
-//     setIsUploading(true);
+  //     setError(null);
+  //     setIsUploading(true);
 
-//     try {
-//       // 1. Trouver la pièce sélectionnée
-//       const selectedRoom = userRooms.find(room => room.title === selectedRoomType);
-//       if (!selectedRoom) {
-//         throw new Error('Type de pièce non trouvé');
-//       }
+  //     try {
+  //       // 1. Trouver la pièce sélectionnée
+  //       const selectedRoom = userRooms.find(room => room.title === selectedRoomType);
+  //       if (!selectedRoom) {
+  //         throw new Error('Type de pièce non trouvé');
+  //       }
 
-//       // 2. Préparer le fichier
-//       const base64Response = await fetch(selectedImage);
-//       const blob = await base64Response.blob();
-//       const fileName = `room_${Date.now()}.jpg`;
-      
-//       // Créer un nouveau fichier avec le type MIME explicite
-//       const file = new File([blob], fileName, { 
-//         type: 'image/jpeg',
-//         lastModified: Date.now()
-//       });
+  //       // 2. Préparer le fichier
+  //       const base64Response = await fetch(selectedImage);
+  //       const blob = await base64Response.blob();
+  //       const fileName = `room_${Date.now()}.jpg`;
 
-//       // 3. Préparer et envoyer FormData
-//       const formData = new FormData();
-//       formData.append('file', file);
-//       formData.append('roomId', selectedRoom.id);
-//       formData.append('description', `Room design for ${selectedRoomType}`);
-//       formData.append('name', fileName);
+  //       // Créer un nouveau fichier avec le type MIME explicite
+  //       const file = new File([blob], fileName, { 
+  //         type: 'image/jpeg',
+  //         lastModified: Date.now()
+  //       });
 
-//       // 4. Upload de la photo
-//       const uploadResponse = await fetch('http://localhost:8080/api/photo/upload', {
-//         method: 'POST',
-//         headers: {
-//           'Authorization': `Bearer ${token}`
-//         },
-//         body: formData
-//       });
+  //       // 3. Préparer et envoyer FormData
+  //       const formData = new FormData();
+  //       formData.append('file', file);
+  //       formData.append('roomId', selectedRoom.id);
+  //       formData.append('description', `Room design for ${selectedRoomType}`);
+  //       formData.append('name', fileName);
 
-//       if (!uploadResponse.ok) {
-//         const responseText = await uploadResponse.text();
-//         console.error('Upload error response:', responseText);
-//         throw new Error(`Échec de l'upload: ${uploadResponse.status}`);
-//       }
-//       const uploadData = await parseResponse(uploadResponse);
-//       console.log("282 uploadData : ",uploadData)
-//       if (!uploadData || !uploadData.id) {
-//         throw new Error('ID de photo manquant dans la réponse');
-//       }
+  //       // 4. Upload de la photo
+  //       const uploadResponse = await fetch('http://localhost:8080/api/photo/upload', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Authorization': `Bearer ${token}`
+  //         },
+  //         body: formData
+  //       });
 
-//       setUploadedPhotoId(uploadData.id);
-//       setIsUploading(false);
-//       setIsGenerating(true);
+  //       if (!uploadResponse.ok) {
+  //         const responseText = await uploadResponse.text();
+  //         console.error('Upload error response:', responseText);
+  //         throw new Error(`Échec de l'upload: ${uploadResponse.status}`);
+  //       }
+  //       const uploadData = await parseResponse(uploadResponse);
+  //       console.log("282 uploadData : ",uploadData)
+  //       if (!uploadData || !uploadData.id) {
+  //         throw new Error('ID de photo manquant dans la réponse');
+  //       }
 
-//       // 5. Générer l'image IA
-//       const generateUrl = new URL('http://localhost:8080/api/interior/res');
-//       generateUrl.searchParams.append('style', selectedStyle);
-//       generateUrl.searchParams.append('room_type', selectedRoomType);
-//       generateUrl.searchParams.append('upscale', 'true');
-//       generateUrl.searchParams.append('model', 'sd15');
-//       generateUrl.searchParams.append('photo_id', uploadData.id);
+  //       setUploadedPhotoId(uploadData.id);
+  //       setIsUploading(false);
+  //       setIsGenerating(true);
 
-//       const generateResponse = await fetch(generateUrl.toString(), {
-//         headers: {
-//           'Authorization': `Bearer ${token}`,
-//           'Accept': 'application/json'
-//         }
-//       });
+  //       // 5. Générer l'image IA
+  //       const generateUrl = new URL('http://localhost:8080/api/interior/res');
+  //       generateUrl.searchParams.append('style', selectedStyle);
+  //       generateUrl.searchParams.append('room_type', selectedRoomType);
+  //       generateUrl.searchParams.append('upscale', 'true');
+  //       generateUrl.searchParams.append('model', 'sd15');
+  //       generateUrl.searchParams.append('photo_id', uploadData.id);
 
-//       if (!generateResponse.ok) {
-//         const errorText = await generateResponse.text();
-//         throw new Error(`Échec de la génération: ${generateResponse.status}`);
-//       }
+  //       const generateResponse = await fetch(generateUrl.toString(), {
+  //         headers: {
+  //           'Authorization': `Bearer ${token}`,
+  //           'Accept': 'application/json'
+  //         }
+  //       });
 
-//       const generatedData = await parseResponse(generateResponse);
+  //       if (!generateResponse.ok) {
+  //         const errorText = await generateResponse.text();
+  //         throw new Error(`Échec de la génération: ${generateResponse.status}`);
+  //       }
 
-//       if (!generatedData || !generatedData.path) {
-//         throw new Error('Chemin de l\'image généré manquant dans la réponse');
-//       }
-//       console.log("282 setGeneratedImage : ",setGeneratedImage(generatedData.path))
-//       setGeneratedImage(generatedData.path);
-      
+  //       const generatedData = await parseResponse(generateResponse);
 
-//     } catch (error) {
-//       console.error('Error details:', error);
-//       setError(error.message || 'Une erreur est survenue');
-//     } finally {
-//       setIsUploading(false);
-//       setIsGenerating(false);
-//     }
-//   };
-const handleRenderDesigns = async () => {
+  //       if (!generatedData || !generatedData.path) {
+  //         throw new Error('Chemin de l\'image généré manquant dans la réponse');
+  //       }
+  //       console.log("282 setGeneratedImage : ",setGeneratedImage(generatedData.path))
+  //       setGeneratedImage(generatedData.path);
+
+
+  //     } catch (error) {
+  //       console.error('Error details:', error);
+  //       setError(error.message || 'Une erreur est survenue');
+  //     } finally {
+  //       setIsUploading(false);
+  //       setIsGenerating(false);
+  //     }
+  //   };
+  const handleRenderDesigns = async () => {
     if (!selectedImage) {
       setError('Veuillez d\'abord télécharger une image');
       return;
@@ -311,12 +323,13 @@ const handleRenderDesigns = async () => {
       const base64Response = await fetch(selectedImage);
       const blob = await base64Response.blob();
       const fileName = `room_${Date.now()}.jpg`;
-      
-      const file = new File([blob], fileName, { 
+
+      const file = new File([blob], fileName, {
         type: 'image/jpeg',
         lastModified: Date.now()
       });
-
+  
+    
       const formData = new FormData();
       formData.append('file', file);
       formData.append('roomId', selectedRoom.id);
@@ -355,7 +368,7 @@ const handleRenderDesigns = async () => {
       }
 
       // Prendre la dernière photo uploadée (celle avec l'ID le plus élevé)
-      const lastPhoto = photos.reduce((prev, current) => 
+      const lastPhoto = photos.reduce((prev, current) =>
         (prev.id > current.id) ? prev : current
       );
 
@@ -399,8 +412,8 @@ const handleRenderDesigns = async () => {
       setIsUploading(false);
       setIsGenerating(false);
     }
-};
-  console.log("294 generatedImage : ",generatedImage)
+  };
+  console.log("294 generatedImage : ", generatedImage)
   // Render conditionnel basé sur l'état
   if (!token) {
     return (
@@ -472,11 +485,10 @@ const handleRenderDesigns = async () => {
           <div>
             <h2 className="text-xl font-semibold mb-4">Upload a photo of your room</h2>
             <div
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                isDragging 
-                  ? 'border-blue-500 bg-blue-50' 
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${isDragging
+                  ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-300 bg-gray-50 hover:border-blue-400'
-              }`}
+                }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -528,9 +540,9 @@ const handleRenderDesigns = async () => {
                 value={selectedRoomType}
                 onChange={(e) => setSelectedRoomType(e.target.value)}
               >
-                {userRooms.map((room) => (
-                  <option key={room.id} value={room.title}>
-                    {room.title}
+                {allRoomTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
                   </option>
                 ))}
               </select>
@@ -563,15 +575,14 @@ const handleRenderDesigns = async () => {
           {/* Section Génération */}
           <div className="flex items-center justify-between pt-4">
             <button
-              className={`flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold px-8 py-3 rounded-lg transition-all ${
-                (isUploading || isGenerating) ? 'opacity-50 cursor-not-allowed' : 'hover:from-purple-600 hover:to-blue-600'
-              }`}
+              className={`flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold px-8 py-3 rounded-lg transition-all ${(isUploading || isGenerating) ? 'opacity-50 cursor-not-allowed' : 'hover:from-purple-600 hover:to-blue-600'
+                }`}
               onClick={handleRenderDesigns}
               disabled={isUploading || isGenerating || !selectedImage}
             >
-              {isUploading ? 'Uploading...' : 
-               isGenerating ? 'Generating...' : 
-               'Render designs'}
+              {isUploading ? 'Uploading...' :
+                isGenerating ? 'Generating...' :
+                  'Render designs'}
             </button>
           </div>
         </div>
@@ -591,17 +602,13 @@ const handleRenderDesigns = async () => {
               <div>
                 <h3 className="text-lg font-semibold mb-2">Original Image</h3>
                 <div className="bg-gray-700 rounded-xl aspect-[4/3] flex items-center justify-center overflow-hidden">
-                  {selectedImage ? (
-                    <img
-                      src={selectedImage}
-                      alt="Original room"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-teal-400">
-                      <Upload size={48} />
-                    </div>
-                  )}
+                <UploadZone
+                  onImageSelect={(image) => {
+                    setSelectedImage(image);
+                    setGeneratedImage(null);
+                  }}
+                  selectedImage={selectedImage}
+                />
                 </div>
               </div>
 
